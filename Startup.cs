@@ -14,6 +14,9 @@ namespace msal_netcore_angular
 {
     public class Startup
     {
+        const string metaDataAddressFormatter = "https://login.microsoftonline.com/{0}/v2.0/.well-known/openid-configuration?p={1}";
+        const string tenantFormatter = "{0}.onmicrosoft.com";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -27,13 +30,16 @@ namespace msal_netcore_angular
         {
             services.AddMvc();
 
+            var myPolicy = Configuration["Jwt:Policy"];
+            var myTenant = string.Format(tenantFormatter, Configuration["Jwt:Tenant"]);
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(o =>
             {
-                o.Authority = Configuration["Jwt:Authority"];
+                o.MetadataAddress = string.Format(metaDataAddressFormatter, myTenant, myPolicy);
                 o.Audience = Configuration["Jwt:Audience"];
                 o.RequireHttpsMetadata = false; //TODO remove this in production
                 o.Events = new JwtBearerEvents()
@@ -73,6 +79,8 @@ namespace msal_netcore_angular
             }
 
             app.UseStaticFiles();
+
+            app.UseAuthentication();
 
             app.UseMvc(routes =>
             {
