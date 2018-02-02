@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import 'msal';
+import { UserAgentApplication, Logger, LogLevel } from 'msal';
+import { User } from 'msal/lib-commonjs/User';
 
 import { environment } from '../environments/environment';
 
@@ -7,11 +8,11 @@ import { environment } from '../environments/environment';
 export class AuthenticationService {
     private authority = `https://login.microsoftonline.com/tfp/${environment.tenant}/${environment.signUpSignInPolicy}`;
 
-    private clientApplication: Msal.UserAgentApplication;
+    private clientApplication: UserAgentApplication;
 
     constructor() {
         this.clientApplication =
-            new Msal.UserAgentApplication(
+            new UserAgentApplication(
                 environment.clientID,
                 this.authority,
                 this.authCallback,
@@ -32,7 +33,7 @@ export class AuthenticationService {
         return this.clientApplication.getUser() != null;
     }
 
-    public getUser(): Msal.User {
+    public getUser(): User {
         return this.clientApplication.getUser();
     }
 
